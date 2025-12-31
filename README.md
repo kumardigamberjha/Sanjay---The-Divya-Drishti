@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🎬 OptiView - Local Video SEO Auditor
 
 A **100% offline** Video SEO analysis tool powered by local AI models via Ollama. Upload your video, and get an SEO score with actionable improvement tips.
@@ -178,3 +179,7 @@ This project is open source under the MIT License.
 - [Qwen](https://github.com/QwenLM/Qwen) - Language model for reasoning
 - [OpenAI Whisper](https://github.com/openai/whisper) - Speech recognition
 - [Streamlit](https://streamlit.io) - App framework
+=======
+# Sanjay---The-Divya-Drishti
+Sanjaya • Divya Drishti: The Content Command Center for Creators. Uses local AI 'Divine Vision' to audit video content, predict virality, and generate strategic SEO roadmaps. 100% Offline &amp; Privacy-focused.
+>>>>>>> 68a7311011668cc82c9557e40813f22c23206f4a
