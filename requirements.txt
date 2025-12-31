@@ -1,0 +1,60 @@
+# Sanjaya v2.0 - The Content Command Center
+# Requirements File
+
+# ========================
+# PREREQUISITE: FFMPEG
+# ========================
+# Before installing Python dependencies, you MUST install FFmpeg:
+#
+# Ubuntu/Debian:
+#   sudo apt update && sudo apt install ffmpeg
+#
+# Fedora:
+#   sudo dnf install ffmpeg
+#
+# macOS (via Homebrew):
+#   brew install ffmpeg
+#
+# Windows (via Chocolatey):
+#   choco install ffmpeg
+#
+# Verify with: ffmpeg -version
+# ========================
+
+# ========================
+# PREREQUISITE: OLLAMA
+# ========================
+# Install Ollama and pull required models:
+#   1. Install Ollama: https://ollama.ai/download
+#   2. Pull models:
+#      ollama pull llava
+#      ollama pull qwen2.5
+# ========================
+
+# Core Framework
+streamlit>=1.28.0
+streamlit-extras>=0.3.0
+
+# Video Processing
+opencv-python>=4.8.0
+
+# Audio Transcription (OpenAI Whisper - Local)
+openai-whisper>=20231117
+
+# Ollama Python Client
+ollama>=0.1.7
+
+# Sentiment Analysis
+textblob>=0.17.1
+
+# PDF Generation
+fpdf>=1.7.2
+
+# Visualization
+matplotlib>=3.7.0
+altair>=5.0.0
+
+# Additional Dependencies
+numpy>=1.24.0
+Pillow>=10.0.0
+pandas>=2.0.0
