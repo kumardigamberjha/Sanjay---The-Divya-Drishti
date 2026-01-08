@@ -215,7 +215,7 @@ def create_sentiment_graph(
         ax1.set_ylim(-1, 1)
         ax1.legend(loc='upper right')
         ax1.grid(True, alpha=0.3)
-        ax1.set_title('🎭 Emotional Analysis Over Time', fontsize=14, fontweight='bold', pad=15)
+        ax1.set_title('Emotional Analysis Over Time', fontsize=14, fontweight='bold', pad=15)
         
         # Plot 2: Intensity
         ax2.plot(times, intensities, color='#fbbf24', linewidth=2.5, marker='s',
@@ -231,11 +231,11 @@ def create_sentiment_graph(
         if viral_clip:
             for ax in [ax1, ax2]:
                 ax.axvspan(viral_clip['start_time'], viral_clip['end_time'],
-                          color='#ec4899', alpha=0.2, label='🔥 Viral Clip')
+                          color='#ec4899', alpha=0.2, label='Viral Clip')
             
             # Add annotation
             mid_time = (viral_clip['start_time'] + viral_clip['end_time']) / 2
-            ax1.annotate('🔥 Potential Viral Moment',
+            ax1.annotate('Potential Viral Moment',
                         xy=(mid_time, 0.8),
                         xytext=(mid_time, 0.95),
                         arrowprops=dict(arrowstyle='->', color='#ec4899', lw=2),
@@ -308,3 +308,52 @@ def format_timestamp(seconds: int) -> str:
     minutes = seconds // 60
     secs = seconds % 60
     return f"{minutes}:{secs:02d}"
+
+
+def slice_viral_clip(video_path: str, start_time: int, end_time: int) -> Optional[str]:
+    """
+    Extract the viral clip processing using moviepy.
+    
+    Args:
+        video_path: Path to source video
+        start_time: Start time in seconds
+        end_time: End time in seconds
+        
+    Returns:
+        Path to extracted clip or None if error
+    """
+    try:
+        from moviepy.video.io.VideoFileClip import VideoFileClip
+        import os
+        
+        # Validate file
+        if not os.path.exists(video_path):
+            return None
+            
+        with VideoFileClip(video_path) as video:
+            # Ensure times are within bounds
+            if start_time < 0: start_time = 0
+            if end_time > video.duration: end_time = video.duration
+            if start_time >= end_time: return None
+            
+            # Extract clip
+            clip = video.subclip(start_time, end_time)
+            
+            # Create output path
+            output_path = tempfile.mktemp(suffix='.mp4', prefix='viral_clip_')
+            
+            # Write file (using fast settings for speed)
+            clip.write_videofile(
+                output_path, 
+                codec='libx264', 
+                audio_codec='aac', 
+                temp_audiofile='temp-audio.m4a', 
+                remove_temp=True,
+                logger=None  # Silence logger
+            )
+            
+            return output_path
+            
+    except Exception as e:
+        print(f"Error slicing clip: {str(e)}")
+        return None

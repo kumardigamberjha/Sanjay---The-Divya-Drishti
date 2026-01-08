@@ -48,7 +48,7 @@ ollama>=0.1.7
 textblob>=0.17.1
 
 # PDF Generation
-fpdf>=1.7.2
+fpdf2>=2.7.0
 
 # Visualization
 matplotlib>=3.7.0
@@ -58,3 +58,6 @@ altair>=5.0.0
 numpy>=1.24.0
 Pillow>=10.0.0
 pandas>=2.0.0
+
+# Video Editing
+moviepy>=1.0.3

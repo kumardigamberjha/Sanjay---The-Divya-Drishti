@@ -342,9 +342,15 @@ Provide a strict, strategic analysis with:
    - Be concrete and tactical
    - Reference specific moments from the content
    
-{'5. **COMPETITOR COMPARISON**\n   - Highlight gaps vs benchmark\n   - Identify advantages' if competitor_text else ''}
+5. **MAGIC SEO PACK (Generate STRICT JSON at the end)**
+   - Provide a JSON object with these keys:
+     - "viral_titles": [list of 3 click-baity titles]
+     - "hashtags": [list of 20 relevant hashtags]
+     - "description": "YouTube description using the transcript summary and links placeholders"
 
-Format in clean Markdown with headers."""
+{'6. **COMPETITOR COMPARISON**\n   - Highlight gaps vs benchmark\n   - Identify advantages' if competitor_text else ''}
+
+Format in clean Markdown with headers. Ensure the JSON block is wrapped in ```json ... ``` at the very end."""
 
         response = ollama.chat(
             model=LOGIC_MODEL,
@@ -421,7 +427,7 @@ def main():
     # ========================================================================
     # MAIN TABS
     # ========================================================================
-    tab1, tab2, tab3 = st.tabs(["🎬 Analyze", "📚 Memory", "⚙️ Settings"])
+    tab1, tab2, tab4, tab3 = st.tabs(["🎬 Analyze", "📚 Memory", "📢 Social Assets", "⚙️ Settings"])
     
     # ========================================================================
     # TAB 1: ANALYZE (Main Analysis Interface)
@@ -455,8 +461,12 @@ def main():
             
             st.divider()
             
+            # Initialize session state for analysis results
+            if 'analysis_complete' not in st.session_state:
+                st.session_state.analysis_complete = False
+            
             # Analyze button
-            if st.button("🔮 Channel Divine Insights", type="primary", use_container_width=True):
+            if st.button("🔮 Channel Divine Insights", type="primary", width='stretch'):
                 try:
                     with st.status("🧘 Sanjaya is meditating on your content...", expanded=True) as status:
                         
@@ -489,8 +499,66 @@ def main():
                         st.write("### 🎯 Advanced Analysis")
                         
                         # Hook analysis
-                        has_hook, hook_desc, hook_score = utils.analyze_hook(transcript, 5)
-                        st.write(f"Hook Quality: {hook_score}/100")
+                        # Extract first frame for hook analysis if not already extracted
+                        st.write("### 🎣 Advanced Hook Inspector")
+                        first_frame = None
+                        if len(frames) > 0:
+                            if frames[0][0] == 0:
+                                first_frame = frames[0][1]
+                            else:
+                                # Extract frame 0 specifically
+                                cap = cv2.VideoCapture(temp_video_path)
+                                cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                                ret, frame = cap.read()
+                                if ret:
+                                    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                                    first_frame = Image.fromarray(frame_rgb)
+                                cap.release()
+                        
+                        first_frame_desc = "No frame analyzed"
+                        if first_frame:
+                            first_frame_desc = analyze_frame_with_llava(
+                                first_frame,
+                                "Is there a human face or large text in this image? Answer only yes/no and briefly describe."
+                            )
+                        
+                        # Use detailed hook analysis
+                        # Note: extract_audio_transcript returns only text, for full segments we'd need to update it.
+                        # For now, we'll pass a dummy segment list if text exists to trigger "speech detected" fallback
+                        dummy_segments = [{'start': 0.0, 'end': 5.0, 'text': transcript[:100]}] if transcript and transcript != "[No speech detected]" else []
+                        
+                        hook_data = utils.analyze_detailed_hook(
+                            temp_video_path,
+                            dummy_segments, # Passing dummy segments as we don't have full segments from current extraction function
+                            first_frame_desc
+                        )
+                        
+                        hook_desc = hook_data['verdict']
+                        
+                        st.markdown(f"""
+                        <div style="background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); 
+                                    padding: 1.5rem; border-radius: 12px; border: 1px solid #818cf8; margin-bottom: 1rem;">
+                            <h3 style="margin:0; color:white; display:flex; justify-content:space-between; align-items:center;">
+                                <span>🎣 Hook Score</span>
+                                <span style="font-size: 2rem; font-weight:bold; color: #fbbf24;">{hook_data['score']}/10</span>
+                            </h3>
+                            <p style="color: #c7d2fe; margin-top: 0.5rem; font-style: italic;">{hook_data['verdict']}</p>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                                <div>
+                                    <strong style="color: #a5b4fc;">✅ Strengths:</strong>
+                                    <ul style="margin: 0.5rem 0 0 1.2rem; color: white;">
+                                        {''.join(f'<li>{s}</li>' for s in hook_data['strengths'])}
+                                    </ul>
+                                </div>
+                                <div>
+                                    <strong style="color: #fca5a5;">⚠️ Improvements:</strong>
+                                    <ul style="margin: 0.5rem 0 0 1.2rem; color: white;">
+                                        {''.join(f'<li>{p}</li>' for p in hook_data.get('penalties', ['None']))}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
                         
                         # Keyword density
                         keyword_density = utils.calculate_keyword_density(transcript, target_keyword)
@@ -519,36 +587,6 @@ def main():
                         
                         status.update(label="✅ Sanjaya's Vision is Complete", state="complete", expanded=False)
                     
-                    # Display Results
-                    st.divider()
-                    st.markdown("## 📊 Divine Revelations")
-                    
-                    # Sentiment Graph (Pillar 3)
-                    st.markdown("### 🎭 Emotional Journey")
-                    st.image(graph_path, use_container_width=True)
-                    
-                    if viral_clip:
-                        st.success(f"🔥 **Potential Viral Clip Detected:** {sentiment.format_timestamp(viral_clip['start_time'])} - {sentiment.format_timestamp(viral_clip['end_time'])}")
-                        st.caption(viral_clip['description'])
-                    
-                    # Two-column layout
-                    col1, col2 = st.columns(2)
-                    
-                    with col1:
-                        st.markdown("### 👂 Audio Transcript")
-                        with st.container(height=400):
-                            st.markdown(transcript)
-                    
-                    with col2:
-                        st.markdown("### 👁️ Visual Analysis")
-                        with st.container(height=400):
-                            st.markdown(visual_summary)
-                    
-                    # SEO Analysis
-                    st.divider()
-                    st.markdown("### 🧠 Strategic SEO Analysis")
-                    st.markdown(seo_analysis)
-                    
                     # Extract score from analysis (simple regex)
                     import re
                     score_match = re.search(r'(\d+)/100', seo_analysis)
@@ -571,32 +609,35 @@ def main():
                         competitor_comparison=competitor_text if competitor_text else None
                     )
                     
-                    st.success(f"✅ Analysis saved to Sanjaya's Memory (ID: {record_id})")
+                    # Store results in session state
+                    st.session_state.analysis_complete = True
+                    st.session_state.analysis_data = {
+                        'video_name': uploaded_file.name,
+                        'niche': target_keyword,
+                        'seo_score': seo_score,
+                        'viral_clip': viral_clip,
+                        'sentiment_summary': sentiment_summary,
+                        'hook_desc': hook_desc,
+                        'keyword_density': keyword_density,
+                        'transcript': transcript,
+                        'visual_summary': visual_summary,
+                        'seo_analysis': seo_analysis,
+                        'graph_path': graph_path,
+                        'competitor_text': competitor_text,
+                        'record_id': record_id,
+                        'magic_pack': None
+                    }
                     
-                    # PILLAR 6: PDF Export
-                    st.divider()
-                    st.markdown("### 📄 Export Professional Report")
-                    
-                    if st.button("📥 Download Empire-Grade PDF", use_container_width=True):
-                        pdf_bytes = pdf_gen.generate_report(
-                            video_name=uploaded_file.name,
-                            niche=target_keyword,
-                            seo_score=seo_score,
-                            viral_clip=viral_clip,
-                            sentiment_summary=sentiment_summary,
-                            hook_quality=hook_desc,
-                            keyword_density=keyword_density,
-                            recommendations=seo_analysis,
-                            sentiment_graph_path=graph_path,
-                            competitor_comparison=competitor_text
-                        )
-                        
-                        st.download_button(
-                            label="📄 Download PDF Report",
-                            data=pdf_bytes,
-                            file_name=f"sanjaya_report_{uploaded_file.name}_{datetime.now().strftime('%Y%m%d')}.pdf",
-                            mime="application/pdf"
-                        )
+                    # Parse Magic SEO Pack JSON
+                    try:
+                        import json
+                        # Find JSON block in response
+                        json_match = re.search(r'```json\s*(\{.*?\})\s*```', seo_analysis, re.DOTALL)
+                        if json_match:
+                            json_str = json_match.group(1)
+                            st.session_state.analysis_data['magic_pack'] = json.loads(json_str)
+                    except Exception as e:
+                        print(f"Error parsing Magic Pack JSON: {e}")
                     
                     st.balloons()
                     
@@ -606,6 +647,91 @@ def main():
                 finally:
                     if os.path.exists(temp_video_path):
                         os.remove(temp_video_path)
+            
+            # Display results if analysis is complete
+            if st.session_state.analysis_complete and 'analysis_data' in st.session_state:
+                data = st.session_state.analysis_data
+                
+                # Display Results
+                st.divider()
+                st.markdown("## 📊 Divine Revelations")
+                
+                # Sentiment Graph (Pillar 3)
+                st.markdown("### 🎭 Emotional Journey")
+                if os.path.exists(data['graph_path']):
+                    st.image(data['graph_path'], width='stretch')
+                
+                if data['viral_clip']:
+                    st.success(f"🔥 **Potential Viral Clip Detected:** {sentiment.format_timestamp(data['viral_clip']['start_time'])} - {sentiment.format_timestamp(data['viral_clip']['end_time'])}")
+                    st.caption(data['viral_clip']['description'])
+                    
+                    # Viral Clip Slicer Button
+                    col_clip1, col_clip2 = st.columns([2, 1])
+                    with col_clip1:
+                        if st.button("✂️ Slice & Download High-Intensity Clip"):
+                            with st.spinner("Slicing viral moment..."):
+                                start_t = data['viral_clip']['start_time']
+                                end_t = data['viral_clip']['end_time']
+                                clip_path = sentiment.slice_viral_clip(temp_video_path, start_t, end_t)
+                                
+                                if clip_path and os.path.exists(clip_path):
+                                    with open(clip_path, "rb") as file:
+                                        btn = st.download_button(
+                                            label="📥 Click to Download Clip",
+                                            data=file,
+                                            file_name=f"viral_clip_{data['video_name']}",
+                                            mime="video/mp4"
+                                        )
+                                else:
+                                    st.error("Could not generate clip. Video might be too short or inaccessible.")
+                
+                # Two-column layout
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    st.markdown("### 👂 Audio Transcript")
+                    with st.container(height=400):
+                        st.markdown(data['transcript'])
+                
+                with col2:
+                    st.markdown("### 👁️ Visual Analysis")
+                    with st.container(height=400):
+                        st.markdown(data['visual_summary'])
+                
+                # SEO Analysis
+                st.divider()
+                st.markdown("### 🧠 Strategic SEO Analysis")
+                st.markdown(data['seo_analysis'])
+                
+                st.success(f"✅ Analysis saved to Sanjaya's Memory (ID: {data['record_id']})")
+                
+                # PILLAR 6: PDF Export
+                st.divider()
+                st.markdown("### 📄 Export Professional Report")
+                
+                # Generate PDF bytes
+                pdf_bytes = pdf_gen.generate_report(
+                    video_name=data['video_name'],
+                    niche=data['niche'],
+                    seo_score=data['seo_score'],
+                    viral_clip=data['viral_clip'],
+                    sentiment_summary=data['sentiment_summary'],
+                    hook_quality=data['hook_desc'],
+                    keyword_density=data['keyword_density'],
+                    recommendations=data['seo_analysis'],
+                    sentiment_graph_path=data['graph_path'],
+                    competitor_comparison=data['competitor_text']
+                )
+                
+                # Direct download button (no nesting)
+                st.download_button(
+                    label="📥 Download Empire-Grade PDF",
+                    data=pdf_bytes,
+                    file_name=f"sanjaya_report_{data['video_name']}_{datetime.now().strftime('%Y%m%d')}.pdf",
+                    mime="application/pdf",
+                    type="primary",
+                    width='stretch'
+                )
         
         elif uploaded_file:
             st.info("👆 Please enter a target keyword in the sidebar to begin analysis.")
@@ -623,7 +749,7 @@ def main():
                     
                     with col1:
                         image = Image.open(thumb_file)
-                        st.image(image, use_container_width=True)
+                        st.image(image, width='stretch')
                     
                     with col2:
                         with st.spinner("LLaVA is analyzing..."):
@@ -636,6 +762,49 @@ def main():
                                 Provide scores and brief explanation."""
                             )
                             st.markdown(score_result)
+    
+    # ========================================================================
+    # TAB 4: SOCIAL ASSETS (Magic SEO Pack) - NEW FEATURE
+    # ========================================================================
+    with tab4:
+        st.markdown("### 📢 Magic SEO Pack")
+        st.caption("Auto-generated social assets for maximum reach")
+        
+        if 'analysis_complete' in st.session_state and st.session_state.analysis_complete and 'analysis_data' in st.session_state:
+            data = st.session_state.analysis_data
+            magic_pack = data.get('magic_pack')
+            
+            if magic_pack:
+                # 1. Viral Titles
+                st.markdown("#### 🔥  Viral Titles")
+                titles = magic_pack.get('viral_titles', [])
+                for i, title in enumerate(titles):
+                    col_t1, col_t2 = st.columns([4, 1])
+                    with col_t1:
+                        st.text_input(f"Title {i+1}", value=title, key=f"title_{i}")
+                    with col_t2:
+                        st.markdown("<br>", unsafe_allow_html=True) # Spacer
+                
+                st.divider()
+                
+                # 2. Description
+                st.markdown("#### 📝 YouTube Description")
+                desc = magic_pack.get('description', 'No description generated.')
+                st.text_area("Copy Description", value=desc, height=200, key="desc_area")
+                
+                st.divider()
+                
+                # 3. Hashtags
+                st.markdown("#### #️⃣ Hashtags")
+                tags = magic_pack.get('hashtags', [])
+                tags_str = " ".join(tags)
+                st.text_area("Hashtags", value=tags_str, height=100, key="tags_area")
+                
+            else:
+                st.warning("⚠️ No Magic SEO Pack data found. Try re-running the analysis.")
+                st.info("Ensure the AI model successfully returned the JSON structure.")
+        else:
+            st.info("👆 Please analyze a video first to unlock the Magic SEO Pack.")
     
     # ========================================================================
     # TAB 2: MEMORY (History Dashboard)
@@ -678,7 +847,7 @@ def main():
             df = pd.DataFrame(df_data)
             
             # Display table
-            st.dataframe(df, use_container_width=True, hide_index=True)
+            st.dataframe(df, width='stretch', hide_index=True)
             
             # Score trend chart
             st.markdown("### 📈 Score Trend")
@@ -693,7 +862,7 @@ def main():
                     tooltip=['Date', 'Score']
                 ).properties(height=300)
                 
-                st.altair_chart(chart, use_container_width=True)
+                st.altair_chart(chart, width='stretch')
             
             # View detailed analysis
             st.divider()

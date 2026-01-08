@@ -107,7 +107,81 @@ def calculate_keyword_density(transcript: str, keyword: str) -> float:
     # Calculate density: (keyword_count / total_words) * 100
     density = (keyword_count / total_words) * 100
     
+    
     return round(density, 2)
+
+
+def analyze_detailed_hook(
+    video_path: str,
+    transcript_segments: list,
+    first_frame_analysis: str
+) -> dict:
+    """
+    Analyze hook quality (first 5 seconds) based on audio and visual cues.
+    
+    Args:
+        video_path: Path to video file
+        transcript_segments: List of whisper segments (or text if segments not available)
+        first_frame_analysis: LLaVA description of the first frame
+        
+    Returns:
+        Dictionary with hook metrics and score
+    """
+    score = 10
+    penalties = []
+    strengths = []
+    
+    # 1. Audio Check (Speech in first 1.5s)
+    # Note: If transcript_segments is just text, we can't fully check timing
+    speech_start_time = 0
+    has_early_speech = False
+    
+    if isinstance(transcript_segments, list) and len(transcript_segments) > 0:
+        first_segment = transcript_segments[0]
+        # Whisper segment structure: {'start': 0.0, 'end': 2.0, 'text': '...'}
+        if isinstance(first_segment, dict):
+            speech_start_time = first_segment.get('start', 0)
+            if speech_start_time <= 1.5:
+                has_early_speech = True
+                strengths.append("Immediate speech detected (< 1.5s)")
+            else:
+                penalties.append("Delayed speech (start > 1.5s)")
+                score -= 3
+    else:
+        # Fallback if no segments provided (assume speech exists if text exists)
+        has_early_speech = True
+        strengths.append("Speech detected (timing estimated)")
+
+    # 2. Visual Check (Face or Text in first frame)
+    first_frame_lower = first_frame_analysis.lower()
+    has_face = any(x in first_frame_lower for x in ['face', 'person', 'man', 'woman', 'human'])
+    has_text = any(x in first_frame_lower for x in ['text', 'words', 'title', 'caption', 'letters'])
+    
+    if has_face:
+        strengths.append("Human presence in opening frame")
+    if has_text:
+        strengths.append("Text/Title visible in opening frame")
+        
+    if not has_face and not has_text:
+        penalties.append("No clear face or text in opening frame")
+        score -= 2
+        
+    # 3. Overall Verdict
+    verdict = "Excellent Hook"
+    if score < 5:
+        verdict = "Weak Hook"
+    elif score < 8:
+        verdict = "Average Hook"
+        
+    return {
+        'score': max(0, score),
+        'verdict': verdict,
+        'has_early_speech': has_early_speech,
+        'has_face': has_face,
+        'has_text': has_text,
+        'strengths': strengths,
+        'penalties': penalties
+    }
 
 
 def analyze_hook(transcript: str, duration_seconds: int = 5) -> Tuple[bool, str, int]:

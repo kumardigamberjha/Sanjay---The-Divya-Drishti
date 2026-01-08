@@ -1,47 +1,105 @@
-# 🎬 OptiView - Local Video SEO Auditor
+# 🔮 Sanjaya v2.0 - The Content Command Center
 
-A **100% offline** Video SEO analysis tool powered by local AI models via Ollama. Upload your video, and get an SEO score with actionable improvement tips.
+**Divya Drishti • Divine Vision**
 
+A production-grade, **100% offline** Video SEO & Strategy tool powered by local AI models. Sanjaya acts as your divine strategist, analyzing your video content through audio, visual, and logical lenses to provide actionable insights, viral predictions, and optimization comparisons.
+
+![Sanjaya V2](https://img.shields.io/badge/Sanjaya-v2.0-purple)
 ![Python](https://img.shields.io/badge/Python-3.9+-blue)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red)
 ![Ollama](https://img.shields.io/badge/Ollama-Local_AI-green)
 
 ---
 
-## 🌟 Features
+## �️ The 7 Pillars of Sanjaya
 
-- **🔒 100% Offline**: No cloud APIs, no data leaves your machine
-- **👂 Audio Analysis**: Whisper transcribes all speech in your video
-- **👁️ Visual Analysis**: LLaVA describes what's shown in key frames
-- **🧠 SEO Grading**: Qwen2.5 provides strict relevance scoring and tips
-- **📊 Beautiful UI**: Modern Streamlit interface with real-time progress
+Sanjaya v2.0 is built upon 7 powerful pillars to ensure complete content dominance:
+
+### 1. 🛡️ System Health & Batch Queue
+Real-time monitoring of your local AI infrastructure (`Ollama`, `LLaVA`, `Qwen`, `Database`). Ensures your "Content Command Center" is always battle-ready.
+
+### 2. 🧠 Sanjaya's Memory (Database)
+Never lose an insight. Every analysis is stored in a local SQLite database. Track your progress, view detailed history, and analyze your SEO score trends over time via the **Memory Dashboard**.
+
+### 3. � Sentiment & Virality Detection
+Advanced emotional arc analysis using `TextBlob` and `Matplotlib`. Sanjaya detects:
+- **Emotional Highs**: Points of maximum engagement.
+- **Viral Clip Slicer**: Automatically identifies and slices the most "viral" 30-second segment from your video.
+
+### 4. ⚔️ Competitor Benchmarking (Spy Mode)
+Don't just optimize; dominate. Paste a competitor's transcript or description to compare your content directly against theirs. Identify their gaps and your advantages.
+
+### 5. 🖼️ Thumbnail A/B Scorer
+Upload multiple thumbnail options. Sanjaya uses **LLaVA (Vision AI)** to rate them based on clickability, text readability, and emotional impact, helping you pick the winner before you publish.
+
+### 6. 📄 Empire-Grade PDF Reports
+Generate professional, high-resolution PDF reports (`fpdf2`) of your analysis. Perfect for sending to clients or archiving your strategy.
+
+### 7. 🎯 Advanced Scoring Logic
+A strict, production-ready scoring algorithm (0-100) powered by **Qwen2.5**. It penalizes weak hooks (-15 points), missing keywords (-10 points), and rewards perfect execution.
+
+---
+
+## 🏗️ Architecture
+
+Sanjaya operates in three distinct phases of "Divine Vision":
+
+```mermaid
+graph TD
+    Input[Video Input .mp4/.mov] --> PhaseA
+    Input --> PhaseB
+
+    subgraph "Phase A: The Ears (Audio)"
+        PhaseA[Whisper Model] --> Transcript[Audio Transcript]
+        Transcript --> Sentiment[Sentiment Analysis]
+    end
+
+    subgraph "Phase B: The Eyes (Visual)"
+        PhaseB[OpenCV + LLaVA] --> Frames[Key Frames]
+        Frames --> VisualDesc[Visual Summary]
+    end
+
+    subgraph "Phase C: The Brain (Logic)"
+        Transcript --> Qwen[Qwen2.5 Strategist]
+        VisualDesc --> Qwen
+        Sentiment --> Qwen
+        Competitor[Competitor Data] --> Qwen
+        
+        Qwen --> Score[SEO Score]
+        Qwen --> Recommendations
+        Qwen --> MagicPack[Magic SEO Pack]
+    end
+
+    subgraph "Output Pillars"
+        Score --> DB[(Sanjaya Memory)]
+        MagicPack --> PDF[PDF Report]
+    end
+```
 
 ---
 
 ## 🔧 Tech Stack
 
-| Component | Technology |
-|-----------|------------|
-| Frontend | Streamlit |
-| Vision Model | LLaVA (via Ollama) |
-| Logic Model | Qwen2.5 (via Ollama) |
-| Audio Model | OpenAI Whisper (local) |
-| Video Processing | OpenCV |
+| Component | Technology | Description |
+|-----------|------------|-------------|
+| **Frontend** | Streamlit | Modern, dark-themed UI |
+| **Vision Model** | LLaVA (via Ollama) | Frame analysis & Thumbnail A/B testing |
+| **Logic Model** | Qwen2.5 (via Ollama) | Reasoning, scoring, and strategy |
+| **Audio Model** | OpenAI Whisper (Local) | High-accuracy speech-to-text |
+| **Sentiment** | TextBlob | Emotional arc tracking |
+| **Reporting** | FPDF2 | PDF generation |
+| **Video Proc** | OpenCV + MoviePy | Frame extraction & clip slicing |
 
 ---
 
 ## 📋 Prerequisites
 
 ### 1. FFmpeg
-
-FFmpeg is required for audio extraction from videos.
+Required for audio extraction and video processing.
 
 ```bash
 # Ubuntu/Debian
 sudo apt update && sudo apt install ffmpeg
-
-# Fedora
-sudo dnf install ffmpeg
 
 # macOS (Homebrew)
 brew install ffmpeg
@@ -50,23 +108,17 @@ brew install ffmpeg
 choco install ffmpeg
 ```
 
-Verify installation:
-```bash
-ffmpeg -version
-```
-
 ### 2. Ollama
-
-Install Ollama and pull the required models.
+Install Ollama to run local AI models.
 
 ```bash
-# Install Ollama (visit https://ollama.ai/download for other methods)
+# Install Ollama
 curl -fsSL https://ollama.ai/install.sh | sh
 
-# Start Ollama service
+# Start Service
 ollama serve
 
-# In a new terminal, pull required models
+# Pull Required Models
 ollama pull llava
 ollama pull qwen2.5
 ```
@@ -75,12 +127,13 @@ ollama pull qwen2.5
 
 ## 🚀 Installation
 
-1. **Clone/Navigate to the project directory**
+1. **Clone the repository**
    ```bash
+   git clone <repo-url>
    cd "Video Seo"
    ```
 
-2. **Create a virtual environment** (recommended)
+2. **Create a virtual environment**
    ```bash
    python -m venv venv
    source venv/bin/activate  # Linux/Mac
@@ -88,69 +141,28 @@ ollama pull qwen2.5
    venv\Scripts\activate     # Windows
    ```
 
-3. **Install Python dependencies**
+3. **Install dependencies**
    ```bash
    pip install -r requirements.txt
    ```
 
 ---
 
-## ▶️ Running the App
+## ▶️ Usage Guide
 
-1. **Ensure Ollama is running** (in a separate terminal):
-   ```bash
-   ollama serve
-   ```
-
-2. **Start the Streamlit app**:
+1. **Start the App**
    ```bash
    streamlit run app.py
    ```
+   *Ensure `ollama serve` is running in the background.*
 
-3. **Open your browser** to `http://localhost:8501`
-
----
-
-## 📖 Usage
-
-1. **Enter Target Keyword**: Type your video's target SEO keyword/niche in the sidebar
-2. **Upload Video**: Select a `.mp4` or `.mov` file
-3. **Click "Analyze Video"**: Wait for the 3-phase analysis:
-   - 👂 **Phase A**: Audio transcription with Whisper
-   - 👁️ **Phase B**: Visual frame analysis with LLaVA
-   - 🧠 **Phase C**: SEO scoring with Qwen2.5
-4. **Review Results**: Get your score and actionable tips!
-
----
-
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     VIDEO INPUT (.mp4/.mov)                  │
-└─────────────────────────┬───────────────────────────────────┘
-                          │
-          ┌───────────────┼───────────────┐
-          ▼               ▼               │
-┌─────────────────┐ ┌─────────────────┐   │
-│   PHASE A       │ │   PHASE B       │   │
-│   THE EARS      │ │   THE EYES      │   │
-│                 │ │                 │   │
-│  Whisper Model  │ │  OpenCV + LLaVA │   │
-│  (Audio → Text) │ │  (Frames → Desc)│   │
-└────────┬────────┘ └────────┬────────┘   │
-         │                   │            │
-         │   ┌───────────────┘            │
-         ▼   ▼                            │
-┌─────────────────────────────────────────▼───────────────────┐
-│                        PHASE C                               │
-│                       THE BRAIN                              │
-│                                                              │
-│   Qwen2.5 (Transcript + Visuals + Keyword → SEO Analysis)   │
-│                                                              │
-│   Output: Relevance Score (0-100) + 3 Actionable Tips       │
-└─────────────────────────────────────────────────────────────┘
-```
+2. **The Workflow**
+   - **Sidebar**: Check system health, enter your **Target Niche/Keyword**, and enable **Competitor Spy Mode** if desired.
+   - **Analyze Tab**: Upload your video. Click **"Channel Divine Insights"**.
+   - **Review**: Watch the analysis unfold in real-time.
+   - **Social Assets**: Go to the **Social Assets** tab to get your "Magic SEO Pack" (Viral Titles, Description, Hashtags).
+   - **Memory**: Visit the **Memory** tab to see past analyses and improvements over time.
+   - **Export**: Download your **Empire-Grade PDF Report** or the **Viral Clip Slice**.
 
 ---
 
@@ -158,10 +170,10 @@ ollama pull qwen2.5
 
 | Issue | Solution |
 |-------|----------|
-| "Cannot connect to Ollama" | Make sure `ollama serve` is running |
-| "Missing models" | Run `ollama pull llava && ollama pull qwen2.5` |
-| FFmpeg errors | Ensure FFmpeg is installed: `ffmpeg -version` |
-| Slow processing | LLaVA analysis takes time; frames are extracted every 5s to optimize |
+| **Models Offline** | Run `ollama serve` and check `ollama list` to ensure `llava` and `qwen2.5` are present. |
+| **FFmpeg Error** | Ensure FFmpeg is in your system PATH. Run `ffmpeg -version`. |
+| **Slow Analysis** | LLaVA is resource-intensive. Using a GPU is highly recommended. |
+| **Database Lock** | Ensure you don't have the database open in another program (like SQLite Browser) while analyzing. |
 
 ---
 
@@ -169,12 +181,8 @@ ollama pull qwen2.5
 
 This project is open source under the MIT License.
 
----
-
 ## 🙏 Credits
 
-- [Ollama](https://ollama.ai) - Local LLM runtime
-- [LLaVA](https://llava-vl.github.io/) - Vision-language model
-- [Qwen](https://github.com/QwenLM/Qwen) - Language model for reasoning
-- [OpenAI Whisper](https://github.com/openai/whisper) - Speech recognition
-- [Streamlit](https://streamlit.io) - App framework
+- **Ollama**: For making local AI accessible.
+- **Streamlit**: For the beautiful frontend framework.
+- **OpenAI Whisper**: For state-of-the-art transcription.
